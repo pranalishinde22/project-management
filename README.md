@@ -113,6 +113,7 @@ Users can move tasks between columns using drag and drop.
 
 ## 🏗️ Project Structure
 
+```text
 Project Management
 │
 ├── Backend
