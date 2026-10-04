@@ -28,21 +28,25 @@ function Navbar({
   const { user, logout } = useAuth();
   const { projects, tasks } = useProjects();
 
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [showNotifications, setShowNotifications] =
+    useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [profilePicture, setProfilePicture] = useState("");
 
   const fileInputRef = useRef(null);
 
+  // Load profile picture for the currently logged-in user
   useEffect(() => {
-    const savedPicture = localStorage.getItem(
-      "flowboard_profile_picture"
-    );
-
-    if (savedPicture) {
-      setProfilePicture(savedPicture);
+    if (!user?.email) {
+      setProfilePicture("");
+      return;
     }
-  }, []);
+
+    const storageKey = `flowboard_profile_picture_${user.email}`;
+    const savedPicture = localStorage.getItem(storageKey);
+
+    setProfilePicture(savedPicture || "");
+  }, [user]);
 
   const totalProjects = projects.length;
   const totalTasks = tasks.length;
@@ -85,12 +89,12 @@ function Navbar({
     reader.onload = () => {
       const imageData = reader.result;
 
-      setProfilePicture(imageData);
+      if (!user?.email) return;
 
-      localStorage.setItem(
-        "flowboard_profile_picture",
-        imageData
-      );
+      const storageKey = `flowboard_profile_picture_${user.email}`;
+
+      setProfilePicture(imageData);
+      localStorage.setItem(storageKey, imageData);
     };
 
     reader.readAsDataURL(file);
@@ -103,8 +107,12 @@ function Navbar({
 
     if (!confirmed) return;
 
+    if (!user?.email) return;
+
+    const storageKey = `flowboard_profile_picture_${user.email}`;
+
     setProfilePicture("");
-    localStorage.removeItem("flowboard_profile_picture");
+    localStorage.removeItem(storageKey);
   };
 
   const handleLogout = () => {

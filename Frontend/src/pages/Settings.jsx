@@ -21,18 +21,20 @@ function Settings() {
   const { user, logout } = useAuth();
   const { projects } = useProjects();
 
-  const [profilePicture, setProfilePicture] =
-    useState("");
+  const [profilePicture, setProfilePicture] = useState("");
 
+  // Load profile picture for the currently logged-in user
   useEffect(() => {
-    const savedPicture = localStorage.getItem(
-      "flowboard_profile_picture"
-    );
-
-    if (savedPicture) {
-      setProfilePicture(savedPicture);
+    if (!user?.email) {
+      setProfilePicture("");
+      return;
     }
-  }, []);
+
+    const storageKey = `flowboard_profile_picture_${user.email}`;
+    const savedPicture = localStorage.getItem(storageKey);
+
+    setProfilePicture(savedPicture || "");
+  }, [user]);
 
   const handleProfilePictureChange = (event) => {
     const file = event.target.files?.[0];
@@ -56,10 +58,14 @@ function Settings() {
     reader.onload = () => {
       const imageData = reader.result;
 
+      if (!user?.email) return;
+
+      const storageKey = `flowboard_profile_picture_${user.email}`;
+
       setProfilePicture(imageData);
 
       localStorage.setItem(
-        "flowboard_profile_picture",
+        storageKey,
         imageData
       );
     };
@@ -74,10 +80,13 @@ function Settings() {
 
     if (!confirmed) return;
 
+    if (!user?.email) return;
+
+    const storageKey = `flowboard_profile_picture_${user.email}`;
+
     setProfilePicture("");
-    localStorage.removeItem(
-      "flowboard_profile_picture"
-    );
+
+    localStorage.removeItem(storageKey);
   };
 
   const handleLogout = () => {
